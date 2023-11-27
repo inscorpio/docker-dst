@@ -1,0 +1,51 @@
+name: Release
+
+permissions:
+  contents: write
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Docker Login
+        uses: docker/login-action@v3.0.0
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Get tag version
+        id: get_tag
+        run: echo "TAG=$(echo ${GITHUB_REF#refs/tags/v})" >> $GITHUB_OUTPUT
+
+      - name: Build and push Docker image
+        env:
+          IMAGE_NAME: inscorpio/docker-dst
+          TAG: ${{ steps.get_tag.outputs.TAG }}
+        run: |
+          echo "$TAG"
+          docker build . --file Dockerfile --tag $IMAGE_NAME
+          docker tag $IMAGE_NAME $IMAGE_NAME:$TAG
+          docker push $IMAGE_NAME:$TAG
+          docker push $IMAGE_NAME
+
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+
+      - run: npx changelogithub
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}

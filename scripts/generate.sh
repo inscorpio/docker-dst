@@ -1,0 +1,13 @@
+#!/bin/bash
+
+mkdir -p $CLUSTER_DIR
+touch $CLUSTER_FILE
+touch $CLUSTER_TOKEN_FILE
+
+mkdir -p $CAVES_DIR
+touch $CAVES_SERVER_FILE
+touch $CAVES_WORLD_FILE
+
+mkdir -p $MASTER_DIR
+touch $MASTER_SERVER_FILE
+touch $MASTER_WORLD_FILE
